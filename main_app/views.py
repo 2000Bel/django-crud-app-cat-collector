@@ -3,7 +3,6 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
 from .models import Cat, Toy
 from .forms import FeedingForm
-
 from django.http import HttpResponse
 
 # Create your views here.
@@ -19,14 +18,18 @@ def cat_index(request):
   return render(request, 'cats/index.html', { 'cats': cats })
 
 def cat_detail(request, cat_id):
-  cat = Cat.objects.get(id=cat_id)
+    cat = Cat.objects.get(id=cat_id)
 
-  toys_cat_doesnt_have = Toy.objects.exclude(id__in = cat.toys.all().values_list('id'))
+    # Only get the toys the cat does not have
+    toys_cat_doesnt_have = Toy.objects.exclude(id__in = cat.toys.all().values_list('id'))
 
-  feeding_form = FeedingForm()
-  return render(request, 'cats/detail.html', { 
-    'cat': cat, 'feeding_form': feeding_form, 'toys': toys_cat_doesnt_have
-  })
+    feeding_form = FeedingForm()
+    return render(request, 'cats/detail.html', {
+        'cat': cat,
+        'feeding_form': feeding_form,
+        'toys': toys_cat_doesnt_have  # send those toys
+    })
+
 
 class CatCreate(CreateView):
   model = Cat
@@ -52,7 +55,7 @@ def add_feeding(request, cat_id):
 
 class ToyCreate(CreateView):
   model = Toy
-  fields = '__all__'
+  fields = ['name', 'color']
 
 class ToyList(ListView):
   model = Toy
